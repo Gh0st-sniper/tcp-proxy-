@@ -1,45 +1,39 @@
-package main 
+package main
 
 import (
-
-	"net"
-	"log"
 	"io"
+	"log"
+	"net"
 )
 
+func main() {
 
-func main(){
+	// listen on port 80
 
-// listen on port 80
-
-listener, err := net.Listen("tcp",":80")
-
-if err != nil {
-
-	log.Fatalln(err)
-}
-
-
-for {
-
-	conn,err := listener.Accept()
+	listener, err := net.Listen("tcp", ":80")
 
 	if err != nil {
 
-		log.Fatalln("Unable to accept connection")
+		log.Fatalln(err)
 	}
 
+	for {
 
-	go handle(conn)
+		conn, err := listener.Accept()
+
+		if err != nil {
+
+			log.Fatalln("Unable to accept connection")
+		}
+
+		go handle(conn)
+	}
+
 }
 
+func handle(src net.Conn) {
 
-}
-
-
-func handle(src net.Conn){
-
-	dst,err := net.Dial("tcp", "https://nmap.org/:80")
+	dst, err := net.Dial("tcp", "https://nmap.org/:80")
 
 	if err != nil {
 
@@ -49,14 +43,11 @@ func handle(src net.Conn){
 
 	defer dst.Close()
 
-
-
-
-	go func(){
+	go func() {
 
 		// COpy our src's output to the destination
 
-		if _, err := io.Copy(dst,src) ; err != nil {
+		if _, err := io.Copy(dst, src); err != nil {
 
 			log.Fatalln(err)
 
@@ -64,13 +55,10 @@ func handle(src net.Conn){
 
 	}()
 
-
-
 	// Copy from dst's output to src
 
-	if _,err := io.Copy(src,dst); err != nil {
+	if _, err := io.Copy(src, dst); err != nil {
 		log.Fatalln(err)
 	}
 
-	
 }
